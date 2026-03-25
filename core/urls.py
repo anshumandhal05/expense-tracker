@@ -11,7 +11,7 @@ urlpatterns = [
     path("reports/", views.reports_view, name="reports"),
     path("export/csv/", views.export_csv_view, name="export_csv"),
     path("export/pdf/", views.export_pdf_view, name="export_pdf"),
-    path("download/pdf/", views.export_pdf_view, name="export_pdf"),
+    # path("download/pdf/", views.export_pdf_view, name="export_pdf"),
 
 ]
 

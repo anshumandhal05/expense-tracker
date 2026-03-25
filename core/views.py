@@ -253,31 +253,3 @@ def export_pdf_view(request):
 
     return export_pdf(qs, request.user, title)
 
-def download_pdf_view(request):
-    """Download filtered transactions as PDF."""
-    qs = Transaction.objects.filter(user=request.user).select_related("category")
-
-    month = request.GET.get("month")
-    year = request.GET.get("year")
-    txn_type = request.GET.get("type")
-
-    if month and year:
-        qs = qs.filter(date__month=int(month), date__year=int(year))
-        MONTH_NAMES = [
-            "",
-            "January",
-            "February",
-            "March",
-            "April",
-            "May",
-            "June",
-            "July",
-            "August",
-            "September",
-            "October",
-            "November",
-            "December",
-        ]
-        title = f"Expense Report — {MONTH_NAMES[int(month)]} {year}"
-    else:
-        title = "Expense Report — All Transactions"
