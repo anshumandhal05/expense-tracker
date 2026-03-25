@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+{% block title %}Delete Category — ExpenseIQ{% endblock %}
+
+{% block content %}
+<div class="form-page">
+    <div class="form-card confirm-delete-card">
+        <div class="text-center mb-4">
+            <div class="delete-icon"><i class="fa-solid fa-tag"></i></div>
+            <h2 class="form-card-title mt-3">Delete Category "{{ cat.name }}"?</h2>
+            <p class="text-muted">Transactions linked to this category will not be deleted, but will lose their category
+                assignment.</p>
+        </div>
+        <form method="post" class="d-flex gap-3 justify-content-center">
+            {% csrf_token %}
+            <a href="{% url 'category_list' %}" class="btn-cancel">Cancel</a>
+            <button type="submit" class="btn-danger-action"><i class="fa-solid fa-trash me-2"></i>Yes, Delete</button>
+        </form>
+    </div>
+</div>
+{% endblock %}

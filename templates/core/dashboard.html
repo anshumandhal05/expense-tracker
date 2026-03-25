@@ -1,0 +1,222 @@
+{% extends 'base.html' %}
+{% block title %}Dashboard — ExpenseIQ{% endblock %}
+{% block breadcrumb %}Dashboard{% endblock %}
+
+{% block content %}
+<div class="dashboard-page">
+
+    <!-- ── Budget Alert Banner ── -->
+    {% if exceeded_count %}
+    <div class="alert-banner">
+        <i class="fa-solid fa-triangle-exclamation"></i>
+        <strong>Budget Alert!</strong> You've exceeded {{ exceeded_count }} budget{{ exceeded_count|pluralize }}.
+        <a href="{% url 'budget_list' %}" class="alert-link">View Budgets →</a>
+    </div>
+    {% endif %}
+
+    <!-- ── Summary Cards ── -->
+    <div class="cards-grid">
+        <div class="summary-card card-balance">
+            <div class="card-icon"><i class="fa-solid fa-wallet"></i></div>
+            <div class="card-body-inner">
+                <div class="card-label">Total Balance</div>
+                <div class="card-value {% if balance < 0 %}text-danger{% endif %}">
+                    ₹{{ balance|floatformat:2 }}
+                </div>
+                <div class="card-sub">All-time net balance</div>
+            </div>
+        </div>
+        <div class="summary-card card-income">
+            <div class="card-icon"><i class="fa-solid fa-arrow-trend-up"></i></div>
+            <div class="card-body-inner">
+                <div class="card-label">This Month's Income</div>
+                <div class="card-value">₹{{ monthly_income|floatformat:2 }}</div>
+                <div class="card-sub">Total: ₹{{ total_income|floatformat:2 }}</div>
+            </div>
+        </div>
+        <div class="summary-card card-expense">
+            <div class="card-icon"><i class="fa-solid fa-arrow-trend-down"></i></div>
+            <div class="card-body-inner">
+                <div class="card-label">This Month's Expenses</div>
+                <div class="card-value">₹{{ monthly_expense|floatformat:2 }}</div>
+                <div class="card-sub">Total: ₹{{ total_expense|floatformat:2 }}</div>
+            </div>
+        </div>
+        <div class="summary-card card-budgets">
+            <div class="card-icon"><i class="fa-solid fa-bullseye"></i></div>
+            <div class="card-body-inner">
+                <div class="card-label">Budget Alerts</div>
+                <div class="card-value {% if exceeded_count %}text-danger{% endif %}">{{ exceeded_count }}</div>
+                <div class="card-sub">
+                    {% if exceeded_count %}Budgets exceeded this month{% else %}All budgets on track 🎉{% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── Charts Row ── -->
+    <div class="charts-row">
+        <div class="chart-card chart-bar-card">
+            <div class="chart-header">
+                <div>
+                    <div class="chart-title">Income vs Expenses</div>
+                    <div class="chart-subtitle">Monthly comparison</div>
+                </div>
+            </div>
+            <div class="chart-body">
+                <canvas id="barChart" height="280"></canvas>
+            </div>
+        </div>
+        <div class="chart-card chart-pie-card">
+            <div class="chart-header">
+                <div>
+                    <div class="chart-title">Spending by Category</div>
+                    <div class="chart-subtitle">This month</div>
+                </div>
+            </div>
+            <div class="chart-body">
+                {% if pie_values %}
+                <canvas id="pieChart" height="280"></canvas>
+                {% else %}
+                <div class="empty-chart">
+                    <i class="fa-solid fa-chart-pie"></i>
+                    <p>No expense data this month</p>
+                    <a href="{% url 'transaction_add' %}?type=EXPENSE" class="btn-sm-primary">Add Expense</a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- ── Recent Transactions + Budget Summary ── -->
+    <div class="bottom-row">
+        <div class="transactions-card">
+            <div class="section-header">
+                <div class="section-title">Recent Transactions</div>
+                <a href="{% url 'transaction_list' %}" class="section-link">View all →</a>
+            </div>
+            {% if recent_transactions %}
+            <div class="txn-list">
+                {% for txn in recent_transactions %}
+                <div class="txn-item">
+                    <div class="txn-icon"
+                        style="background-color: {% if txn.category %}{{ txn.category.color|default:'#6366f1' }}{% else %}#6366f1{% endif %}22; color: {% if txn.category %}{{ txn.category.color|default:'#6366f1' }}{% else %}#6366f1{% endif %};">
+                        <i class="fa-solid {% if txn.category %}{{ txn.category.icon|default:'fa-ellipsis-h' }}{% else %}fa-ellipsis-h{% endif %}"></i>
+                    </div>
+                    <div class="txn-info">
+                        <div class="txn-desc">{% if txn.description %}{{ txn.description }}{% elif txn.category %}{{ txn.category.name }}{% else %}Transaction{% endif %}</div>
+                        <div class="txn-date">{{ txn.date|date:"d M Y" }} &bull; {{ txn.get_payment_method_display }}
+                        </div>
+                    </div>
+                    <div class="txn-amount {% if txn.transaction_type == 'INCOME' %}income{% else %}expense{% endif %}">
+                        {% if txn.transaction_type == 'INCOME' %}+{% else %}−{% endif %}₹{{ txn.amount|floatformat:2 }}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="empty-state">
+                <i class="fa-solid fa-receipt"></i>
+                <p>No transactions yet</p>
+                <a href="{% url 'transaction_add' %}" class="btn-sm-primary">Add First Transaction</a>
+            </div>
+            {% endif %}
+        </div>
+
+        <div class="budgets-card">
+            <div class="section-header">
+                <div class="section-title">Budget Status</div>
+                <a href="{% url 'budget_list' %}" class="section-link">Manage →</a>
+            </div>
+            {% if current_budgets %}
+            {% for b in current_budgets %}
+            <div class="budget-alert-item">
+                <div class="budget-name">{% if b.category %}{{ b.category.name }}{% else %}Overall{% endif %}</div>
+                <div class="budget-figures">
+                    <span class="{% if b.is_exceeded %}text-danger{% endif %}">₹{{ b.get_spent|floatformat:0 }}</span> /
+                    ₹{{ b.monthly_limit|floatformat:0 }}
+                </div>
+                <div class="progress budget-progress">
+                    <div class="progress-bar {% if b.is_exceeded %}bg-danger{% elif b.get_percentage >= 80 %}bg-warning{% else %}bg-success{% endif %}"
+                        style="width: {{ b.get_percentage }}%;"></div>
+                </div>
+                <div class="budget-over-label">
+                    {% if b.is_exceeded %}
+                    <span class="text-danger">Over by ₹{{ b.get_remaining|floatformat:0|slice:"1:" }}</span>
+                    {% else %}
+                    <span class="text-success">₹{{ b.get_remaining|floatformat:0 }} left</span>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+            {% else %}
+            <div class="empty-state">
+                <i class="fa-solid fa-bullseye"></i>
+                <p>No budgets set this month!</p>
+                <a href="{% url 'budget_add' %}" class="btn-sm-primary">Set Budget</a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Chart data for JavaScript -->
+    {{ pie_labels|json_script:"pie-labels-data" }}
+    {{ pie_values|json_script:"pie-values-data" }}
+    {{ pie_colors|json_script:"pie-colors-data" }}
+    {{ month_labels|json_script:"month-labels-data" }}
+    {{ bar_income|json_script:"bar-income-data" }}
+    {{ bar_expense|json_script:"bar-expense-data" }}
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Parse chart data from json_script tags with error handling
+    console.log('Dashboard script running...');
+    
+    function safeJsonParse(elementId, fallback = []) {
+        const el = document.getElementById(elementId);
+        if (!el) {
+            console.warn(`Missing element: ${elementId}`);
+            return fallback;
+        }
+        try {
+            return JSON.parse(el.textContent);
+        } catch (e) {
+            console.error(`Error parsing ${elementId}:`, e);
+            return fallback;
+        }
+    }
+    
+    window.PIE_LABELS = safeJsonParse('pie-labels-data', []);
+    window.PIE_VALUES = safeJsonParse('pie-values-data', []);
+    window.PIE_COLORS = safeJsonParse('pie-colors-data', []);
+    window.MONTH_LABELS = safeJsonParse('month-labels-data', []);
+    window.BAR_INCOME = safeJsonParse('bar-income-data', []);
+    window.BAR_EXPENSE = safeJsonParse('bar-expense-data', []);
+    
+    console.log('Chart data:', {
+        months: window.MONTH_LABELS,
+        income: window.BAR_INCOME,
+        expense: window.BAR_EXPENSE,
+        pie_labels: window.PIE_LABELS,
+        pie_values: window.PIE_VALUES
+    });
+    
+    // Initialize charts immediately (DOMContentLoaded already fired by this point)
+    if (typeof initBarChart === 'function') {
+        console.log('Initializing bar chart...');
+        initBarChart();
+    } else {
+        console.error('initBarChart function not found');
+    }
+    
+    if (typeof initPieChart === 'function') {
+        console.log('Initializing pie chart...');
+        initPieChart();
+    } else {
+        console.error('initPieChart function not found');
+    }
+</script>
+{% endblock %}

@@ -1,0 +1,127 @@
+{% extends 'base.html' %}
+
+{% block title %}Register — ExpenseIQ{% endblock %}
+
+{% block content %}
+<div class="auth-container">
+    <div class="auth-card auth-card-wide">
+        <div class="auth-logo">
+            <i class="fa-solid fa-wallet"></i>
+        </div>
+
+        <h1 class="auth-title">Create Account</h1>
+        <p class="auth-subtitle">Start tracking your finances today — free forever</p>
+
+        <form method="post" class="auth-form">
+            {% csrf_token %}
+
+            <div class="row g-3">
+                <!-- First Name -->
+                <div class="col-md-6">
+                    <div class="form-floating">
+                        <input type="text" name="first_name" id="id_first_name" class="form-control"
+                            placeholder="First Name"
+                            value="{{ form.first_name.value|default:'' }}">
+                        <label for="id_first_name">First Name</label>
+                    </div>
+                </div>
+
+                <!-- Last Name -->
+                <div class="col-md-6">
+                    <div class="form-floating">
+                        <input type="text" name="last_name" id="id_last_name" class="form-control"
+                            placeholder="Last Name"
+                            value="{{ form.last_name.value|default:'' }}">
+                        <label for="id_last_name">Last Name</label>
+                    </div>
+                </div>
+
+                <!-- Username -->
+                <div class="col-12">
+                    <div class="form-floating">
+                        <input type="text" name="username" id="id_username"
+                            class="form-control {% if form.username.errors %}is-invalid{% endif %}"
+                            placeholder="Username"
+                            autocomplete="username"
+                            value="{{ form.username.value|default:'' }}"
+                            required>
+                        <label for="id_username">
+                            <i class="fa-solid fa-user me-1"></i> Username
+                        </label>
+                        {% if form.username.errors %}
+                            <div class="invalid-feedback">
+                                {{ form.username.errors.0 }}
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Email -->
+                <div class="col-12">
+                    <div class="form-floating">
+                        <input type="email" name="email" id="id_email"
+                            class="form-control"
+                            placeholder="Email"
+                            value="{{ form.email.value|default:'' }}"
+                            required>
+                        <label for="id_email">
+                            <i class="fa-solid fa-envelope me-1"></i> Email
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Password -->
+                <div class="col-md-6">
+                    <div class="form-floating">
+                        <input type="password" name="password1" id="id_password1"
+                            class="form-control {% if form.password1.errors %}is-invalid{% endif %}"
+                            placeholder="Password"
+                            required>
+                        <label for="id_password1">
+                            <i class="fa-solid fa-lock me-1"></i> Password
+                        </label>
+                        {% if form.password1.errors %}
+                            <div class="invalid-feedback">
+                                {{ form.password1.errors.0 }}
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Confirm Password -->
+                <div class="col-md-6">
+                    <div class="form-floating">
+                        <input type="password" name="password2" id="id_password2"
+                            class="form-control {% if form.password2.errors %}is-invalid{% endif %}"
+                            placeholder="Confirm Password"
+                            required>
+                        <label for="id_password2">
+                            <i class="fa-solid fa-lock me-1"></i> Confirm Password
+                        </label>
+                        {% if form.password2.errors %}
+                            <div class="invalid-feedback">
+                                {{ form.password2.errors.0 }}
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <button type="submit" class="btn-auth-submit mt-3">
+                <i class="fa-solid fa-user-plus me-2"></i> Create Account
+            </button>
+        </form>
+
+        <div class="auth-footer">
+            Already have an account?
+            <a href="{% url 'login' %}">Sign in →</a>
+        </div>
+    </div>
+
+    <div class="auth-decoration">
+        <div class="deco-circle deco-1"></div>
+        <div class="deco-circle deco-2"></div>
+        <div class="deco-circle deco-3"></div>
+    </div>
+</div>
+{% endblock %}

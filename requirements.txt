@@ -1,0 +1,8 @@
+Django==5.2.6
+django-crispy-forms==2.3
+crispy-bootstrap5==2024.10
+reportlab==4.2.5
+python-decouple==3.8
+Pillow==11.1.0
+# Production DB (uncomment for production)
+# psycopg2-binary==2.9.9

@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+{% block title %}Delete Budget — ExpenseIQ{% endblock %}
+
+{% block content %}
+<div class="form-page">
+    <div class="form-card confirm-delete-card">
+        <div class="text-center mb-4">
+            <div class="delete-icon"><i class="fa-solid fa-bullseye"></i></div>
+            <h2 class="form-card-title mt-3">Remove Budget?</h2>
+            <p class="text-muted">
+                Budget: <strong>{{ budget.category.name|default:"Overall" }}</strong> —
+                Limit: <strong>₹{{ budget.monthly_limit }}</strong> —
+                Period: <strong>{{ budget.month }}/{{ budget.year }}</strong>
+            </p>
+        </div>
+        <form method="post" class="d-flex gap-3 justify-content-center">
+            {% csrf_token %}
+            <a href="{% url 'budget_list' %}" class="btn-cancel">Cancel</a>
+            <button type="submit" class="btn-danger-action"><i class="fa-solid fa-trash me-2"></i>Yes, Remove</button>
+        </form>
+    </div>
+</div>
+{% endblock %}

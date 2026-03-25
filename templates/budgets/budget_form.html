@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+{% block title %}{{ action }} Budget — ExpenseIQ{% endblock %}
+{% block breadcrumb %}<a href="{% url 'budget_list' %}">Budgets</a> / {{ action }}{% endblock %}
+
+{% block content %}
+<div class="form-page">
+    <div class="form-card">
+        <div class="form-card-header">
+            <div class="form-card-icon"><i class="fa-solid fa-bullseye"></i></div>
+            <div>
+                <h2 class="form-card-title">{{ action }} Budget</h2>
+                <p class="form-card-subtitle">Set a monthly spending limit for a category</p>
+            </div>
+        </div>
+        <form method="post">
+            {% csrf_token %}
+            <div class="row g-3">
+                <div class="col-12">
+                    <label class="form-label">Category <span class="text-muted">(leave blank for overall
+                            limit)</span></label>
+                    {{ form.category }}
+                </div>
+                <div class="col-12">
+                    <label class="form-label">Budget Limit (₹)*</label>
+                    {{ form.monthly_limit }}
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">Month*</label>
+                    {{ form.month }}
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">Year*</label>
+                    {{ form.year }}
+                </div>
+            </div>
+            <div class="form-actions mt-4">
+                <a href="{% url 'budget_list' %}" class="btn-cancel">Cancel</a>
+                <button type="submit" class="btn-primary-action"><i class="fa-solid fa-check me-2"></i>Save
+                    Budget</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

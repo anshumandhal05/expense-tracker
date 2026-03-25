@@ -1,0 +1,54 @@
+{% extends 'base.html' %}
+{% block title %}Categories — ExpenseIQ{% endblock %}
+{% block breadcrumb %}Categories{% endblock %}
+
+{% block content %}
+<div class="page-header d-flex align-items-center justify-content-between flex-wrap gap-3">
+    <div>
+        <h1 class="page-title">Categories</h1>
+        <p class="page-subtitle">Manage your custom categories</p>
+    </div>
+    <a href="{% url 'category_add' %}" class="btn-primary-action"><i class="fa-solid fa-plus me-2"></i>New Category</a>
+</div>
+
+{% if user_cats %}
+<div class="content-card mb-4">
+    <div class="section-header">
+        <div class="section-title">My Custom Categories</div>
+    </div>
+    <div class="categories-grid p-3">
+        {% for cat in user_cats %}
+        <div class="cat-card">
+            <div class="cat-icon" style="background:{{ cat.color }}22; color:{{ cat.color }}">
+                <i class="fa-solid {{ cat.icon }}"></i>
+            </div>
+            <div class="cat-name">{{ cat.name }}</div>
+            <div class="cat-actions">
+                <a href="{% url 'category_edit' cat.pk %}" class="action-btn edit-btn"><i
+                        class="fa-solid fa-pen"></i></a>
+                <a href="{% url 'category_delete' cat.pk %}" class="action-btn delete-btn"><i
+                        class="fa-solid fa-trash"></i></a>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endif %}
+
+<div class="content-card">
+    <div class="section-header">
+        <div class="section-title">System Categories</div>
+    </div>
+    <div class="categories-grid p-3">
+        {% for cat in system_cats %}
+        <div class="cat-card cat-card-system">
+            <div class="cat-icon" style="background:{{ cat.color }}22; color:{{ cat.color }}">
+                <i class="fa-solid {{ cat.icon }}"></i>
+            </div>
+            <div class="cat-name">{{ cat.name }}</div>
+            <div class="cat-badge">Default</div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

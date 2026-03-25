@@ -1,0 +1,163 @@
+{% extends 'base.html' %}
+
+{% block title %}Reports — ExpenseIQ{% endblock %}
+
+{% block breadcrumb %}
+Reports
+{% endblock %}
+
+{% block content %}
+
+<div class="page-header">
+    <h1 class="page-title">Reports</h1>
+    <p class="page-subtitle">Monthly financial summary and export options</p>
+</div>
+
+<!-- Filter -->
+<div class="filter-card mb-4">
+    <form method="get" class="d-flex flex-wrap gap-3 align-items-end">
+
+        <div>
+            <label class="form-label">Month</label>
+            <select name="month" class="form-select">
+                {% for num, name in months %}
+                    <option value="{{ num }}" {% if num == filter_month %}selected{% endif %}>
+                        {{ name }}
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div>
+            <label class="form-label">Year</label>
+            <select name="year" class="form-select">
+                {% for y in years %}
+                    <option value="{{ y }}" {% if y == filter_year %}selected{% endif %}>
+                        {{ y }}
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <button type="submit" class="btn-primary-action">
+            <i class="fa-solid fa-filter me-2"></i>Apply
+        </button>
+
+    </form>
+</div>
+
+<!-- Summary -->
+<div class="cards-grid mb-4">
+
+    <div class="summary-card card-income">
+        <div class="card-icon">
+            <i class="fa-solid fa-arrow-trend-up"></i>
+        </div>
+        <div class="card-body-inner">
+            <div class="card-label">{{ month_name }} Income</div>
+            <div class="card-value">₹{{ total_income|floatformat:2 }}</div>
+        </div>
+    </div>
+
+    <div class="summary-card card-expense">
+        <div class="card-icon">
+            <i class="fa-solid fa-arrow-trend-down"></i>
+        </div>
+        <div class="card-body-inner">
+            <div class="card-label">{{ month_name }} Expenses</div>
+            <div class="card-value">₹{{ total_expense|floatformat:2 }}</div>
+        </div>
+    </div>
+
+    <div class="summary-card card-balance">
+        <div class="card-icon">
+            <i class="fa-solid fa-scale-balanced"></i>
+        </div>
+        <div class="card-body-inner">
+            <div class="card-label">Net Balance</div>
+            <div class="card-value {% if balance < 0 %}text-danger{% endif %}">
+                ₹{{ balance|floatformat:2 }}
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<!-- Top Categories -->
+{% if top_categories %}
+<div class="content-card mb-4">
+
+    <div class="section-header">
+        <div class="section-title">Top Spending Categories</div>
+    </div>
+
+    <div class="p-3">
+        {% for cat in top_categories %}
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <span class="fw-500">
+                    {{ cat.category__name|default:"Uncategorized" }}
+                </span>
+                <span class="fw-600 text-danger">
+                    ₹{{ cat.total|floatformat:2 }}
+                </span>
+            </div>
+        {% endfor %}
+    </div>
+
+</div>
+{% endif %}
+
+<!-- Export -->
+<div class="content-card">
+
+    <div class="section-header">
+        <div class="section-title">Export Report</div>
+    </div>
+
+    <div class="p-4">
+        <p class="text-muted mb-4">
+            Download all transactions for
+            <strong>{{ month_name }} {{ filter_year }}</strong>
+        </p>
+
+        <div class="d-flex flex-wrap gap-3">
+
+            <a href="{% url 'export_csv' %}?month={{ filter_month }}&year={{ filter_year }}"
+               class="export-btn export-csv">
+                <i class="fa-solid fa-file-csv"></i>
+                <div>
+                    <div class="fw-600">Export CSV</div>
+                    <div class="text-muted" style="font-size:0.8rem">
+                        Excel-compatible
+                    </div>
+                </div>
+            </a>
+
+            <a href="{% url 'export_pdf' %}?month={{ filter_month }}&year={{ filter_year }}"
+               class="export-btn export-pdf">
+                <i class="fa-solid fa-file-pdf"></i>
+                <div>
+                    <div class="fw-600">Export PDF</div>
+                    <div class="text-muted" style="font-size:0.8rem">
+                        Formatted report
+                    </div>
+                </div>
+            </a>
+
+            <a href="{% url 'export_csv' %}"
+               class="export-btn export-all">
+                <i class="fa-solid fa-database"></i>
+                <div>
+                    <div class="fw-600">Export All (CSV)</div>
+                    <div class="text-muted" style="font-size:0.8rem">
+                        All time
+                    </div>
+                </div>
+            </a>
+
+        </div>
+    </div>
+
+</div>
+
+{% endblock %}

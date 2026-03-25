@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+{% block title %}Delete Transaction — ExpenseIQ{% endblock %}
+{% block breadcrumb %}<a href="{% url 'transaction_list' %}">Transactions</a> / Delete{% endblock %}
+
+{% block content %}
+<div class="form-page">
+    <div class="form-card confirm-delete-card">
+        <div class="text-center mb-4">
+            <div class="delete-icon"><i class="fa-solid fa-trash-can"></i></div>
+            <h2 class="form-card-title mt-3">Delete Transaction?</h2>
+            <p class="text-muted">This action cannot be undone.</p>
+        </div>
+        <div class="txn-preview">
+            <div><strong>{{ txn.description|default:"Transaction" }}</strong></div>
+            <div class="text-muted">{{ txn.date|date:"d M Y" }} &bull; {{ txn.get_transaction_type_display }}</div>
+            <div
+                class="fs-5 fw-700 {% if txn.transaction_type == 'INCOME' %}text-success{% else %}text-danger{% endif %} mt-2">
+                ₹{{ txn.amount|floatformat:2 }}
+            </div>
+        </div>
+        <form method="post" class="d-flex gap-3 justify-content-center mt-4">
+            {% csrf_token %}
+            <a href="{% url 'transaction_list' %}" class="btn-cancel">Cancel</a>
+            <button type="submit" class="btn-danger-action"><i class="fa-solid fa-trash me-2"></i>Yes, Delete</button>
+        </form>
+    </div>
+</div>
+{% endblock %}

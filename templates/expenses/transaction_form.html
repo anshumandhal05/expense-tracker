@@ -1,0 +1,137 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ action }} Transaction — ExpenseIQ{% endblock %}
+
+{% block breadcrumb %}
+<a href="{% url 'transaction_list' %}">Transactions</a> / {{ action }}
+{% endblock %}
+
+{% block content %}
+<div class="form-page">
+    <div class="form-card">
+
+        <div class="form-card-header">
+            <div class="form-card-icon">
+                <i class="fa-solid {% if action == 'Add' %}fa-plus{% else %}fa-pen{% endif %}"></i>
+            </div>
+            <div>
+                <h2 class="form-card-title">{{ action }} Transaction</h2>
+                <p class="form-card-subtitle">Fill in the details below</p>
+            </div>
+        </div>
+
+        <!-- Type toggle -->
+        <div class="type-toggle-group mb-4" id="typeToggle">
+            <button type="button"
+                    class="type-toggle-btn expense-btn"
+                    id="expenseToggle"
+                    onclick="setType('EXPENSE')">
+                <i class="fa-solid fa-arrow-trend-down me-2"></i>Expense
+            </button>
+
+            <button type="button"
+                    class="type-toggle-btn income-btn"
+                    id="incomeToggle"
+                    onclick="setType('INCOME')">
+                <i class="fa-solid fa-arrow-trend-up me-2"></i>Income
+            </button>
+        </div>
+
+        <form method="post" id="txnForm">
+            {% csrf_token %}
+
+            {{ form.transaction_type }}  {# hidden input controlled by JS #}
+
+            <div class="row g-3">
+
+                <!-- Amount -->
+                <div class="col-md-6">
+                    <label class="form-label">Amount (₹)*</label>
+                    {{ form.amount }}
+                    {% if form.amount.errors %}
+                        <div class="invalid-feedback d-block">
+                            {{ form.amount.errors.0 }}
+                        </div>
+                    {% endif %}
+                </div>
+
+                <!-- Date -->
+                <div class="col-md-6">
+                    <label class="form-label">Date*</label>
+                    {{ form.date }}
+                </div>
+
+                <!-- Category -->
+                <div class="col-12">
+                    <label class="form-label">Category</label>
+                    {{ form.category }}
+                </div>
+
+                <!-- Description -->
+                <div class="col-12">
+                    <label class="form-label">Description</label>
+                    {{ form.description }}
+                </div>
+
+                <!-- Payment Method -->
+                <div class="col-md-6">
+                    <label class="form-label">Payment Method</label>
+                    {{ form.payment_method }}
+                </div>
+
+                <!-- Recurring -->
+                <div class="col-md-6 d-flex align-items-end">
+                    <div class="form-check form-switch ms-2">
+                        {{ form.is_recurring }}
+                        <label class="form-check-label ms-2"
+                               for="{{ form.is_recurring.id_for_label }}">
+                            Recurring Transaction
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Notes -->
+                <div class="col-12">
+                    <label class="form-label">
+                        Notes <span class="text-muted">(optional)</span>
+                    </label>
+                    {{ form.notes }}
+                </div>
+
+            </div>
+
+            <div class="form-actions mt-4">
+                <a href="{% url 'transaction_list' %}" class="btn-cancel">Cancel</a>
+
+                <button type="submit" class="btn-primary-action">
+                    <i class="fa-solid fa-check me-2"></i>
+                    {{ action }} Transaction
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    function setType(type) {
+        const input = document.getElementById('id_transaction_type');
+        if (!input) return;
+
+        input.value = type;
+
+        document.getElementById('expenseToggle')
+            .classList.toggle('active', type === 'EXPENSE');
+
+        document.getElementById('incomeToggle')
+            .classList.toggle('active', type === 'INCOME');
+    }
+
+    // Safe init after DOM loads
+    document.addEventListener('DOMContentLoaded', function () {
+        const input = document.getElementById('id_transaction_type');
+        const current = input && input.value ? input.value : 'EXPENSE';
+        setType(current);
+    });
+</script>
+
+{% endblock %}

@@ -1,0 +1,146 @@
+{% extends 'base.html' %}
+{% block title %}Transactions — ExpenseIQ{% endblock %}
+{% block breadcrumb %}Transactions{% endblock %}
+
+{% block content %}
+<div class="page-header d-flex align-items-center justify-content-between flex-wrap gap-3">
+    <div>
+        <h1 class="page-title">Transactions</h1>
+        <p class="page-subtitle">{{ total_count }} transaction{{ total_count|pluralize }} found</p>
+    </div>
+    <div class="d-flex gap-2">
+        <a href="{% url 'transaction_add' %}?type=INCOME" class="btn-secondary-action">
+            <i class="fa-solid fa-plus me-1"></i>Income
+        </a>
+        <a href="{% url 'transaction_add' %}?type=EXPENSE" class="btn-primary-action">
+            <i class="fa-solid fa-minus me-1"></i>Expense
+        </a>
+    </div>
+</div>
+
+<!-- Filter form -->
+<div class="filter-card mb-4">
+    <form method="get" class="row g-3 align-items-end">
+        <div class="col-md-3">
+            <label class="form-label">Search</label>
+            {{ filter_form.query }}
+        </div>
+        <div class="col-md-2">
+            <label class="form-label">Type</label>
+            {{ filter_form.transaction_type }}
+        </div>
+        <div class="col-md-2">
+            <label class="form-label">Category</label>
+            {{ filter_form.category }}
+        </div>
+        <div class="col-md-2">
+            <label class="form-label">From</label>
+            {{ filter_form.date_from }}
+        </div>
+        <div class="col-md-2">
+            <label class="form-label">To</label>
+            {{ filter_form.date_to }}
+        </div>
+        <div class="col-md-1 d-flex gap-2">
+            <button type="submit" class="btn-icon-primary" title="Filter"><i class="fa-solid fa-search"></i></button>
+            <a href="{% url 'transaction_list' %}" class="btn-icon-secondary" title="Clear"><i
+                    class="fa-solid fa-xmark"></i></a>
+        </div>
+    </form>
+</div>
+
+<!-- Transaction Table -->
+<div class="content-card">
+    {% if page_obj.object_list %}
+    <div class="table-responsive">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Description</th>
+                    <th>Category</th>
+                    <th>Type</th>
+                    <th>Payment</th>
+                    <th class="text-end">Amount</th>
+                    <th class="text-center">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for txn in page_obj %}
+                <tr>
+                    <td class="text-muted" style="font-size:0.88rem">{{ txn.date|date:"d M Y" }}</td>
+                    <td>
+                        <div class="fw-500">{{ txn.description|default:"—" }}</div>
+                        {% if txn.is_recurring %}<span class="badge-recurring"><i
+                                class="fa-solid fa-rotate me-1"></i>Recurring</span>{% endif %}
+                    </td>
+                    <td>
+                        {% if txn.category %}
+                        <span class="category-badge"
+                            style="background:{{ txn.category.color }}22; color:{{ txn.category.color }}">
+                            <i class="fa-solid {{ txn.category.icon }} me-1"></i>{{ txn.category.name }}
+                        </span>
+                        {% else %}<span class="text-muted">—</span>{% endif %}
+                    </td>
+                    <td>
+                        <span
+                            class="type-badge {% if txn.transaction_type == 'INCOME' %}type-income{% else %}type-expense{% endif %}">
+                            {{ txn.get_transaction_type_display }}
+                        </span>
+                    </td>
+                    <td class="text-muted" style="font-size:0.88rem">{{ txn.get_payment_method_display }}</td>
+                    <td
+                        class="text-end fw-600 {% if txn.transaction_type == 'INCOME' %}text-success{% else %}text-danger{% endif %}">
+                        {% if txn.transaction_type == 'INCOME' %}+{% else %}−{% endif %}₹{{ txn.amount|floatformat:2 }}
+                    </td>
+                    <td class="text-center">
+                        <div class="d-flex gap-1 justify-content-center">
+                            <a href="{% url 'transaction_edit' txn.pk %}" class="action-btn edit-btn" title="Edit">
+                                <i class="fa-solid fa-pen"></i>
+                            </a>
+                            <a href="{% url 'transaction_delete' txn.pk %}" class="action-btn delete-btn"
+                                title="Delete">
+                                <i class="fa-solid fa-trash"></i>
+                            </a>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Pagination -->
+    {% if page_obj.has_other_pages %}
+    <div class="pagination-wrapper">
+        <nav>
+            <ul class="pagination mb-0">
+                {% if page_obj.has_previous %}
+                <li class="page-item"><a class="page-link"
+                        href="?page={{ page_obj.previous_page_number }}{% if request.GET.query %}&query={{ request.GET.query }}{% endif %}">‹</a>
+                </li>
+                {% endif %}
+                {% for num in page_obj.paginator.page_range %}
+                {% if page_obj.number == num %}
+                <li class="page-item active"><span class="page-link">{{ num }}</span></li>
+                {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %} <li class="page-item"><a
+                        class="page-link" href="?page={{ num }}">{{ num }}</a></li>
+                    {% endif %}
+                    {% endfor %}
+                    {% if page_obj.has_next %}
+                    <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}">›</a></li>
+                    {% endif %}
+            </ul>
+        </nav>
+    </div>
+    {% endif %}
+
+    {% else %}
+    <div class="empty-state p-5">
+        <i class="fa-solid fa-receipt"></i>
+        <p>No transactions match your filters.</p>
+        <a href="{% url 'transaction_add' %}" class="btn-sm-primary">Add Your First Transaction</a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

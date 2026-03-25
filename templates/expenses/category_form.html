@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+{% block title %}{{ action }} Category — ExpenseIQ{% endblock %}
+{% block breadcrumb %}<a href="{% url 'category_list' %}">Categories</a> / {{ action }}{% endblock %}
+
+{% block content %}
+<div class="form-page">
+    <div class="form-card">
+        <div class="form-card-header">
+            <div class="form-card-icon"><i class="fa-solid fa-tag"></i></div>
+            <div>
+                <h2 class="form-card-title">{{ action }} Category</h2>
+                <p class="form-card-subtitle">Custom categories help you organise spending</p>
+            </div>
+        </div>
+        <form method="post">
+            {% csrf_token %}
+            <div class="mb-3">
+                <label class="form-label">Category Name*</label>
+                {{ form.name }}
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Icon</label>
+                {{ form.icon }}
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Colour</label>
+                {{ form.color }}
+            </div>
+            <div class="form-actions mt-4">
+                <a href="{% url 'category_list' %}" class="btn-cancel">Cancel</a>
+                <button type="submit" class="btn-primary-action"><i class="fa-solid fa-check me-2"></i>Save
+                    Category</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

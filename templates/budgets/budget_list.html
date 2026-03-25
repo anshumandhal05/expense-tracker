@@ -1,0 +1,79 @@
+{% extends 'base.html' %}
+{% block title %}Budgets — ExpenseIQ{% endblock %}
+{% block breadcrumb %}Budgets{% endblock %}
+
+{% block content %}
+<div class="page-header d-flex align-items-center justify-content-between flex-wrap gap-3">
+    <div>
+        <h1 class="page-title">Budgets</h1>
+        <p class="page-subtitle">Set monthly limits per category and track spending</p>
+    </div>
+    <a href="{% url 'budget_add' %}" class="btn-primary-action"><i class="fa-solid fa-plus me-2"></i>Set Budget</a>
+</div>
+
+{% if alert_count %}
+<div class="alert-banner mb-4">
+    <i class="fa-solid fa-triangle-exclamation"></i>
+    <strong>{{ alert_count }} budget{{ alert_count|pluralize }} exceeded</strong> this month!
+</div>
+{% endif %}
+
+{% if budget_data %}
+<div class="row g-4">
+    {% for bd in budget_data %}
+    <div class="col-md-6 col-lg-4">
+        <div
+            class="budget-card {% if bd.exceeded %}budget-card-danger{% elif bd.percentage >= 80 %}budget-card-warning{% endif %}">
+            <div class="budget-card-top">
+                <div>
+                    <div class="budget-cat-name">{{ bd.budget.category.name|default:"Overall" }}</div>
+                    <div class="budget-period">{{ bd.budget.month }}/{{ bd.budget.year }}</div>
+                </div>
+                <div class="d-flex gap-1">
+                    <a href="{% url 'budget_edit' bd.budget.pk %}" class="action-btn edit-btn"><i
+                            class="fa-solid fa-pen"></i></a>
+                    <a href="{% url 'budget_delete' bd.budget.pk %}" class="action-btn delete-btn"><i
+                            class="fa-solid fa-trash"></i></a>
+                </div>
+            </div>
+
+            <div class="budget-amounts">
+                <div>
+                    <div class="label-sm">Spent</div>
+                    <div class="amount-spent {% if bd.exceeded %}text-danger{% endif %}">₹{{ bd.spent|floatformat:0 }}
+                    </div>
+                </div>
+                <div class="text-end">
+                    <div class="label-sm">Limit</div>
+                    <div class="amount-limit">₹{{ bd.budget.monthly_limit|floatformat:0 }}</div>
+                </div>
+            </div>
+
+            <div class="progress budget-progress-bar mt-3">
+                <div class="progress-bar {% if bd.exceeded %}bg-danger{% elif bd.percentage >= 80 %}bg-warning{% else %}bg-success{% endif %}"
+                    style="width: {{ bd.percentage }}%"></div>
+            </div>
+
+            <div class="budget-footer">
+                <span class="pct-label">{{ bd.percentage }}%</span>
+                {% if bd.exceeded %}
+                <span class="over-label">Over by ₹{{ bd.remaining|floatformat:0|slice:"1:" }}</span>
+                {% else %}
+                <span class="remaining-label">₹{{ bd.remaining|floatformat:0 }} left</span>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+{% else %}
+<div class="content-card">
+    <div class="empty-state p-5">
+        <i class="fa-solid fa-bullseye"></i>
+        <p>You haven't set any budgets yet.</p>
+        <a href="{% url 'budget_add' %}" class="btn-sm-primary">Set Your First Budget</a>
+    </div>
+</div>
+{% endif %}
+{% endblock %}
